@@ -13,22 +13,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  Id Int @id @default(autoincrement()) @map("userId")
-  email String @unique @map("email")
-  password String @map("password")
-  role String @map("role")
-  createdAt DateTime @default(now()) @map("createdAt")
-  updatedAt DateTime @updatedAt @map("updatedAt")
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @map("email")
+  password  String   @map("password")
+  name      String   @map("name")
+  role      UserRole @default(APPLICANT) @map("role")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  resumes   Resume[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  APPLICANT
+  RECRUITER
 }
 
 model Resume {
-  resumeId int @id @default(autoincrement()) @map("resumeId")
-  title String @map("title")
-  introduce String @map("introduce")
-  status String @map("status")
-  createdAt DateTime @default(now()) @map("createdAt")
-  updatedAt DateTime @updatedAt @map("updatedAt")
+  id        Int          @id @default(autoincrement())
+  authorId  Int          @map("author_id")
+  title     String
+  content   String       @db.Text
+  status    resumeStatus @default(APPLY)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+  author    User         @relation(fields: [authorId], references: [id])
 
-  User Users @relation(fields: [Id], references: [Id])
+  @@map("resumes")
+}
+
+enum resumeStatus {
+  APPLY
+  DROP
+  PASS
+  INTERVIEW1
+  INTERVIEW2
+  FINAL_PASS
 }
